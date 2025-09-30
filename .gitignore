@@ -19,3 +19,6 @@ backend/logs/
 backend/.env
 backend/.env.*
 backend/*.log
+
+# Allow sharing example env file
+!backend/.env.example
