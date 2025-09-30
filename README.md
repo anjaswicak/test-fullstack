@@ -154,6 +154,12 @@ Response (201):
 { "id": 1, "username": "author" }
 ```
 
+Response (409 Conflict):
+```json
+{ "error": "Conflict" }
+```
+
+
 2) Login
 - Method: POST `/api/login`
 - Body: `{ "username": "author", "password": "authorpass" }`
@@ -175,10 +181,12 @@ curl -i \
 ```
 
 Response (200):
-```http
-Set-Cookie: refresh_token=<httpOnly_cookie>; Path=/api; SameSite=Lax; HttpOnly; Max-Age=604800
-
+```json
 { "token": "<ACCESS_TOKEN>" }
+```
+Response (401):
+```json
+{ "error": "Invalid email or password" }
 ```
 
 3) Refresh Access Token
