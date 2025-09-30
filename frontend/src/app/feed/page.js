@@ -19,6 +19,24 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Format waktu relatif dalam Bahasa Indonesia
+function formatRelativeId(timeInput) {
+    if (!timeInput) return '';
+    const d = new Date(timeInput);
+    if (Number.isNaN(d.getTime())) return '';
+    const now = Date.now();
+    let diffSec = Math.floor((now - d.getTime()) / 1000);
+    if (diffSec < 0) diffSec = 0; // antisipasi jam sistem berbeda
+
+    if (diffSec < 60) return 'baru saja';
+    const minutes = Math.floor(diffSec / 60);
+    if (minutes < 60) return `${minutes} menit yang lalu`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} jam yang lalu`;
+    const days = Math.floor(hours / 24);
+    return `${days} hari yang lalu`;
+}
+
 export default function FeedPage() {
     const router = useRouter();
     const [posts, setPosts] = useState([]);
@@ -410,7 +428,7 @@ export default function FeedPage() {
                             <li key={p.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                                 <div className="text-sm text-slate-500 mb-1">by <span className="font-medium text-slate-800">{p.author || userInfo.username}</span></div>
                                 <div className="whitespace-pre-wrap text-slate-900">{p.content}</div>
-                                <div className="text-xs text-slate-400 mt-2">{p.created_at ? new Date(p.created_at).toLocaleString() : ''}</div>
+                                <div className="text-xs text-slate-400 mt-2">{p.created_at ? formatRelativeId(p.created_at) : ''}</div>
                             </li>
                         ))}
                     </ul>
