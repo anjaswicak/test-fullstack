@@ -30,14 +30,11 @@ Lingkungan/Secrets:
 - Anda bisa export environment di shell sebelum menjalankan Compose:
 
 ```zsh
-# contoh cepat (gunakan nilai acak kuat untuk produksi)
-export ACCESS_TOKEN_SECRET=$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")
-export REFRESH_TOKEN_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('base64url'))")
+# clone repositori ini
+git clone https://github.com/anjaswicak/test-fullstack.git
 
-# optional override database (default: postgres/postgres/fullstack_test)
-export DB_USER=postgres
-export DB_PASSWORD=postgres
-export DB_DATABASE=fullstack_test
+# masuk direktori test-fullstack
+cd test-fullstack
 ```
 
 Build & Run:
