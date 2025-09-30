@@ -4,6 +4,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const knex = require('./db/knex');
 
 // Muat variabel lingkungan dari .env
 dotenv.config();
@@ -22,6 +23,12 @@ app.use(
     credentials: true,
   })
 );
+
+app.use((req, res, next) => {
+  knex.raw('select 1')
+    .then(() => next())
+    .catch((err) => res.status(503).json({ error: 'Database connection failed', details: err.message }));
+});
 
 // Cookie parser for refresh tokens
 app.use(cookieParser());

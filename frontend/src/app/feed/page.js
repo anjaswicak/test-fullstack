@@ -61,13 +61,21 @@ export default function FeedPage() {
             method: "POST",
             credentials: "include",
         });
-        if (!res.ok) return null;
+        if (!res.ok) {
+            localStorage.removeItem('token');
+            return router.push('/');
+        }
+        if(res.status===503){
+            localStorage.removeItem('token');
+            return router.push('/');
+        }
         const data = await res.json();
         if (data?.token) {
             localStorage.setItem("token", data.token);
             return data.token;
         }
-        return null;
+        localStorage.removeItem('token');
+        return router.push('/');
     }
 
     // Centralized token checker: returns existing token or tries to refresh
@@ -104,6 +112,9 @@ export default function FeedPage() {
             });
             if (!retry.ok) throw new Error("Failed to load feed after refresh.");
             return retry.json();
+        }else if(res.status===503){
+            localStorage.removeItem('token');
+            return router.push('/');
         }
 
         if (!res.ok) {
@@ -136,6 +147,9 @@ export default function FeedPage() {
             });
             if (!retry.ok) throw new Error("Failed to load following after refresh.");
             return retry.json();
+        }else if(res.status===503){
+            localStorage.removeItem('token');
+            return router.push('/');
         }
 
         if (!res.ok) {
@@ -187,6 +201,9 @@ export default function FeedPage() {
                 setAlert("");
                 setContent("");
                 return;
+            }else if(res.status===503){
+                localStorage.removeItem('token');
+                return router.push('/');
             }
             if (!res.ok) {
                 let msg = `Failed to create post (${res.status})`;
@@ -224,6 +241,9 @@ export default function FeedPage() {
             });
             if (!retry.ok) throw new Error('Failed to load users after refresh.');
             return retry.json();
+        }else if(res.status===503){
+            localStorage.removeItem('token');
+            return router.push('/');
         }
         if (!res.ok) throw new Error(`Failed to load users (${res.status})`);
         return res.json();
@@ -243,6 +263,9 @@ export default function FeedPage() {
             if (!newToken) throw new Error('Session expired. Please log in again.');
             useToken = newToken;
             res = await doCall(useToken);
+        }else if(res.status===503){
+            localStorage.removeItem('token');
+            return router.push('/');
         }
         if (!res.ok) throw new Error('Failed to update follow.');
         // Refresh following, suggested, and feed lists after action
