@@ -145,25 +145,32 @@ curl:
 ```bash
 curl -i \
   -H "Content-Type: application/json" \
-  -d '{"username":"budi","password":"rahasia123"}' \
+  -d '{"username":"author","password":"authorpass"}' \
   http://localhost:3001/api/register
 ```
 
 Response (201):
 ```json
-{ "id": 3, "username": "budi" }
+{ "id": 1, "username": "author" }
 ```
 
 2) Login
 - Method: POST `/api/login`
-- Body: `{ "username": string, "password": string }`
+- Body: `{ "username": "author", "password": "authorpass" }`
 - 200: `{ "token": "<access_jwt>" }` dan menyetel cookie httpOnly untuk refresh token
 
+Contoh:
+```http
+POST /api/login
+Content-Type: application/json
+
+{ "username": "author", "password": "authorpass" }
+```
 curl:
 ```bash
 curl -i \
   -H "Content-Type: application/json" \
-  -d '{"username":"budi","password":"rahasia123"}' \
+  -d '{"username":"author","password":"authorpass"}' \
   http://localhost:3001/api/login
 ```
 
