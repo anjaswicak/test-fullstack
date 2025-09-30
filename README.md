@@ -15,11 +15,6 @@ Dokumen ini mencakup panduan setup, instruksi menjalankan, dokumentasi API, sert
 └── README.md          # Dokumen ini
 ```
 
-## Prasyarat
-- Node.js LTS (>= 18)
-- npm atau pnpm/yarn
-- PostgreSQL (disarankan lokal, bisa juga pakai managed DB)
-
 ## Menjalankan dengan Docker(Recommended)
 
 Prerequisites:
@@ -74,7 +69,14 @@ docker compose build frontend
 docker compose up -d
 ```
 
-## Setup Backend (API)
+## Setup Manual
+
+Requirement : 
+- Node.js LTS (>= 18)
+- npm atau pnpm/yarn
+- PostgreSQL (disarankan lokal, bisa juga pakai managed DB)
+
+### Setup Backend (API)
 
 1) Salin berkas env dan isi sesuai lingkungan Anda
 
@@ -131,7 +133,7 @@ node server.js
 ```
 
 
-## Setup Frontend (UI)
+### Setup Frontend (UI)
 
 1) Konfigurasi lingkungan
 
