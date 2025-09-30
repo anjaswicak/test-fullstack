@@ -28,11 +28,11 @@ function signTokens(payload) {
 exports.login = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
+    return send(res, { status: 400, data: { error: 'Username and password are required' }, raw: true });
   }
   const user = await users.authenticate(username, password);
   if (!user) {
-    return res.status(401).json({ error: 'Invalid email or password' });
+    return send(res, { status: 401, data: { error: 'Invalid email or password' }, raw: true });
   }
   const payload = { sub: user.id, username: user.username };
   const { token, refreshToken } = signTokens(payload);
