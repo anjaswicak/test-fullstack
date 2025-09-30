@@ -1,0 +1,21 @@
+# Namun abaikan file hasil build dan rahasia di masing-masing folder
+# Frontend (Next/Vite/React)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.*
+frontend/coverage/
+frontend/*.log
+
+# Backend (Node/Express/Knex, dll.)
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/coverage/
+backend/logs/
+backend/.env
+backend/.env.*
+backend/*.log
