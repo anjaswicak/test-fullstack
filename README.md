@@ -104,6 +104,68 @@ npm run dev
 
 Kunjungi `http://localhost:3000`.
 
+## Menjalankan dengan Docker
+
+Prerequisites:
+- Docker dan Docker Compose
+
+Lingkungan/Secrets:
+- Backend membaca secrets JWT dari environment container.
+- Anda bisa export environment di shell sebelum menjalankan Compose:
+
+```zsh
+# contoh cepat (gunakan nilai acak kuat untuk produksi)
+export ACCESS_TOKEN_SECRET=$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")
+export REFRESH_TOKEN_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('base64url'))")
+
+# optional override database (default: postgres/postgres/fullstack_test)
+export DB_USER=postgres
+export DB_PASSWORD=postgres
+export DB_DATABASE=fullstack_test
+```
+
+Build & Run:
+```zsh
+# dari root repo
+docker compose build
+docker compose up -d
+```
+
+Akses:
+- Frontend: http://localhost:3000
+- Backend: http://localhost:3001/health
+- Postgres: localhost:5432 (volume: pgdata)
+
+Catatan:
+- Container backend di-compose dikonfigurasi menjalankan migrasi dan seed awal otomatis (RUN_MIGRATIONS=true, RUN_SEEDS=true).
+- Frontend memakai `NEXT_PUBLIC_BASE_API=http://localhost:3001` di Compose.
+
+Perintah berguna:
+```zsh
+# Lihat log
+docker compose logs -f backend
+docker compose logs -f frontend
+
+# Status container
+docker compose ps
+
+# Hentikan
+docker compose down
+
+# Hentikan dan hapus volume DB (reset data)
+docker compose down -v
+
+# Rebuild setelah mengubah source
+docker compose build backend
+docker compose build frontend
+docker compose up -d
+```
+
+Troubleshooting singkat:
+- Port 3000/3001/5432 sudah dipakai? Hentikan service lain atau ganti port pada docker-compose.yml.
+- Error koneksi DB: pastikan service `db` healthy; coba ulang `docker compose up -d` dan cek `docker compose logs db`.
+- CORS: setel `CORS_ORIGIN` sesuai domain frontend jika berbeda dari `http://localhost:3000`.
+
 ## Alur Autentikasi (Ringkas)
 - Pengguna login via `POST /api/login` → API mengembalikan `access token (JWT)` dalam respons JSON dan mengatur `refresh token` di cookie httpOnly.
 - Frontend menyimpan access token di `localStorage` dan mengirimkannya sebagai header `Authorization: Bearer <token>` untuk endpoint yang dilindungi.
