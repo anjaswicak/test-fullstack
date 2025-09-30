@@ -120,6 +120,11 @@ Format umum:
 - Response JSON mengembalikan data mentah (raw) atau objek hasil operasi.
 - Status penting: 200 (OK), 201 (Created), 400 (Bad Request), 401 (Unauthorized), 404 (Not Found), 409 (Conflict), 500 (Server Error)
 
+Catatan:
+- Contoh di bawah menggunakan curl. Ganti `http://localhost:3001` jika server Anda berbeda.
+- Untuk endpoint protected, sertakan header `Authorization: Bearer <ACCESS_TOKEN>`.
+- Pada implementasi saat ini, endpoint `POST /api/refresh` mengembalikan properti `accessToken` (bukan `token`). Sesuaikan konsumsi di frontend atau ubah backend agar konsisten.
+
 ### Auth
 
 1) Register
@@ -136,19 +141,77 @@ Content-Type: application/json
 { "username": "budi", "password": "rahasia123" }
 ```
 
+curl:
+```bash
+curl -i \
+  -H "Content-Type: application/json" \
+  -d '{"username":"budi","password":"rahasia123"}' \
+  http://localhost:3001/api/register
+```
+
+Response (201):
+```json
+{ "id": 3, "username": "budi" }
+```
+
 2) Login
 - Method: POST `/api/login`
 - Body: `{ "username": string, "password": string }`
 - 200: `{ "token": "<access_jwt>" }` dan menyetel cookie httpOnly untuk refresh token
+
+curl:
+```bash
+curl -i \
+  -H "Content-Type: application/json" \
+  -d '{"username":"budi","password":"rahasia123"}' \
+  http://localhost:3001/api/login
+```
+
+Response (200):
+```http
+Set-Cookie: refresh_token=<httpOnly_cookie>; Path=/api; SameSite=Lax; HttpOnly; Max-Age=604800
+
+{ "token": "<ACCESS_TOKEN>" }
+```
 
 3) Refresh Access Token
 - Method: POST `/api/refresh`
 - Cookie: refresh token (httpOnly)
 - 200: `{ "token": "<access_jwt_baru>" }`
 
+Implementasi saat ini mengembalikan `{ "accessToken": "<jwt>" }` dan merotasi cookie refresh.
+
+curl:
+```bash
+# Asumsikan Anda sudah menyimpan cookie dari step login ke file cookies.txt
+curl -i \
+  -X POST \
+  --cookie cookies.txt \
+  --cookie-jar cookies.txt \
+  http://localhost:3001/api/refresh
+```
+
+Response (200) saat ini:
+```json
+{ "accessToken": "<ACCESS_TOKEN_BARU>" }
+```
+
 4) Logout
 - Method: POST `/api/logout`
 - Menghapus cookie refresh
+
+curl:
+```bash
+curl -i -X POST \
+  --cookie cookies.txt \
+  --cookie-jar cookies.txt \
+  http://localhost:3001/api/logout
+```
+
+Response (200):
+```json
+{ "ok": true }
+```
 
 ### Posts
 
@@ -158,6 +221,21 @@ Content-Type: application/json
 - Body: `{ "content": string }`
 - 201/200: Mengembalikan post yang dibuat `{ id, user_id, content, created_at, ... }`
 
+curl:
+```bash
+curl -i \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"content":"Halo semua!"}' \
+  http://localhost:3001/api/posts
+```
+
+Response (201):
+```json
+{ "id": 10, "userid": 3, "content": "Halo semua!", "created_at": "2025-09-30T07:20:10.123Z" }
+```
+Catatan: bidang yang dikembalikan saat create saat ini menggunakan `userid` (tanpa underscore).
+
 ### Follow / Unfollow
 
 1) Follow user
@@ -165,20 +243,73 @@ Content-Type: application/json
 - Header: `Authorization: Bearer <token>`
 - 200: Sukses (no content/objek hasil sederhana)
 
+curl:
+```bash
+curl -i -X POST \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  http://localhost:3001/api/follow/2
+```
+
+Response (200):
+```json
+{ "message": "you are now following user 2" }
+```
+
 2) Unfollow user
 - Method: POST `/api/unfollow/:userid`
 - Header: `Authorization: Bearer <token>`
 - 200: Sukses
+
+curl:
+```bash
+curl -i -X POST \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  http://localhost:3001/api/unfollow/2
+```
+
+Response (200):
+```json
+{ "message": "you unfollowed user 2" }
+```
 
 3) Following list
 - Method: GET `/api/users/:id/following`
 - Header: (disarankan) `Authorization: Bearer <token>`
 - 200: Array user yang di-follow
 
+curl:
+```bash
+curl -s \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  http://localhost:3001/api/users/3/following | jq
+```
+
+Response (200):
+```json
+[
+  { "id": 1, "username": "author" },
+  { "id": 2, "username": "follower" }
+]
+```
+
 4) Followers list
 - Method: GET `/api/users/:id/followers`
 - Header: (disarankan) `Authorization: Bearer <token>`
 - 200: Array user yang mengikuti
+
+curl:
+```bash
+curl -s \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  http://localhost:3001/api/users/1/followers | jq
+```
+
+Response (200):
+```json
+[
+  { "id": 2, "username": "follower" }
+]
+```
 
 ### Users
 
@@ -186,6 +317,26 @@ Content-Type: application/json
 - Method: GET `/api/users/:id/suggested`
 - Header: (disarankan) `Authorization: Bearer <token>`
 - 200: Array pengguna dengan metrik `{ id, username, posts_count, followers_count, is_following }`
+
+curl:
+```bash
+curl -s \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  "http://localhost:3001/api/users/3/suggested?limit=10&offset=0" | jq
+```
+
+Response (200):
+```json
+[
+  {
+    "id": 5,
+    "username": "andi",
+    "posts_count": 12,
+    "followers_count": 4,
+    "is_following": false
+  }
+]
+```
 
 ### Feed
 
@@ -199,6 +350,42 @@ Contoh:
 ```
 GET /api/feed?page=1&limit=10
 Authorization: Bearer <token>
+```
+
+curl:
+```bash
+curl -s \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  "http://localhost:3001/api/feed?page=1&limit=10" | jq
+```
+
+Response (200):
+```json
+[
+  {
+    "id": 15,
+    "user_id": 1,
+    "author": "author",
+    "content": "Halo dunia!",
+    "created_at": "2025-09-30T07:30:00.000Z",
+    "updated_at": "2025-09-30T07:30:00.000Z"
+  }
+]
+```
+
+### Health Check
+
+- Method: GET `/health`
+- 200: `{ ok: true, message: 'API up' }`
+
+curl:
+```bash
+curl -s http://localhost:3001/health | jq
+```
+
+Response (200):
+```json
+{ "ok": true, "message": "API up" }
 ```
 
 ## Catatan Desain (Design Notes)
