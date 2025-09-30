@@ -76,7 +76,7 @@ Requirement :
 
 1) Salin berkas env dan isi sesuai lingkungan Anda
 
-Buat file `backend/.env`:
+Copy file `backend/.env.example` menjadi `backend/.env`, lalu sesuaikan : 
 
 ```
 # Server
