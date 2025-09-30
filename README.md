@@ -17,12 +17,8 @@ Dokumen ini mencakup panduan setup, instruksi menjalankan, dokumentasi API, sert
 
 ## Menjalankan dengan Docker(Recommended)
 
-Prerequisites:
+Requirements:
 - Docker dan Docker Compose
-
-Lingkungan/Secrets:
-- Backend membaca secrets JWT dari environment container.
-- Anda bisa export environment di shell sebelum menjalankan Compose:
 
 ```zsh
 # clone repositori ini
