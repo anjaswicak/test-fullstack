@@ -34,12 +34,36 @@ EOF
   chmod 600 ./.env || true
 fi
 
-# 2) Optionally run migrations/seeds
+# 2) Optionally wait for DB and run migrations/seeds
+wait_for_db() {
+  retries=${DB_WAIT_RETRIES:-30}
+  delay=${DB_WAIT_DELAY:-2}
+  i=1
+  echo "[entrypoint] Waiting for database to be ready (retries=$retries, delay=${delay}s)"
+  while [ $i -le $retries ]; do
+    if node -e "const knex=require('./db/knex');knex.raw('select 1').then(()=>{process.exit(0)}).catch(()=>{process.exit(1)})"; then
+      echo "[entrypoint] Database is ready"
+      return 0
+    fi
+    echo "[entrypoint] DB not ready yet... ($i/$retries), waiting ${delay}s"
+    i=$((i+1))
+    sleep $delay
+  done
+  echo "[entrypoint] ERROR: Database not ready after $retries attempts"
+  return 1
+}
+
+if [ "$RUN_MIGRATIONS" = "true" ] || [ "$RUN_SEEDS" = "true" ]; then
+  wait_for_db
+fi
+
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-  npx knex migrate:latest || true
+  echo "[entrypoint] Running migrations"
+  npx knex migrate:latest
 fi
 if [ "$RUN_SEEDS" = "true" ]; then
-  npx knex seed:run || true
+  echo "[entrypoint] Running seeds"
+  npx knex seed:run
 fi
 
 # 3) Run the main command
