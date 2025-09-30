@@ -76,9 +76,6 @@ npm start
 node server.js
 ```
 
-5) Cek kesehatan server
-
-Buka: `http://localhost:3001/health` (atau sesuai `PORT`).
 
 ## Setup Frontend (UI)
 
@@ -388,20 +385,6 @@ Response (200):
 ]
 ```
 
-### Health Check
-
-- Method: GET `/health`
-- 200: `{ ok: true, message: 'API up' }`
-
-curl:
-```bash
-curl -s http://localhost:3001/health | jq
-```
-
-Response (200):
-```json
-{ "ok": true, "message": "API up" }
-```
 
 ## Catatan Desain (Design Notes)
 
@@ -439,4 +422,4 @@ Response (200):
   - Frontend menyimpan access token di `localStorage` dengan key `token`. Periksa konsol bila ada error.
 
 ## Lisensi
-Proyek ini untuk tujuan edukasi/demonstrasi. Gunakan dengan bijak dan sesuaikan keperluan produksi Anda.
+Proyek ini hanya untuk test skill masuk kerja
